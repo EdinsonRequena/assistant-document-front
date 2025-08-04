@@ -1,69 +1,55 @@
-# React + TypeScript + Vite
+# Assistant-Document **Frontend**
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Chat web en React + Vite que permite preguntarle a GPT sobre los documentos (PDF / TXT) que subes en cada conversación.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🗂 Estructura
+```bash
+src/
+├ api/            # helpers fetch (request.ts)
+├ components/     # Button, Textarea, ChatBubble, LoadingDots, …
+├ hooks/          # useChat (WebSocket + uploads)
+├ layout/         # DefaultLayout
+├ pages/          # ChatPage.tsx
+├ styles/         # utilidades CSS (drag-and-drop)
+├ index.css       # Tailwind + design-tokens
+└ main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚙️ Requisitos
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Herramienta | Versión |
+| ----------- | ------- |
+| **Node.js** | ≥ 20.19 (LTS) |
+| **npm / pnpm / yarn** | cualquiera |
+| **Backend** | corriendo en `http://localhost:8000` (o la URL que pongas en el `.env`) |
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+
+## .env
+```env
+VITE_BACKEND_URL=http://localhost:8000
 ```
+
+## Arranque Local
+```bash
+nvm install 20.19
+nvm use 20.19
+npm install
+cp .env.example .env
+npm run dev
+```
+
+## Arranque con Docker
+```bash
+docker compose build
+docker compose up
+```
+
+## Características
+- **Subida de Archivos**: arrastra y suelta archivos PDF o TXT.
+- **WebSocket**: conexión en tiempo real para enviar mensajes y recibir respuestas.
+- **Chat**: interfaz de chat con mensajes y respuestas.
+- **Diseño Responsivo**: adaptado para móviles y escritorio.
+- **Carga de Archivos**: arrastrar y soltar archivos para subirlos.
+- **Streaming token-a-token**: con animación de typing (tres puntitos).
