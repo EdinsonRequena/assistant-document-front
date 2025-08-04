@@ -8,6 +8,12 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface UploadStatus {
+  name: string;
+  uploading: boolean;
+  done: boolean;
+}
+
 export function useChat(initialId?: number) {
   const [conversationId, setConversationId] = useState<number | undefined>(
     initialId
@@ -15,17 +21,18 @@ export function useChat(initialId?: number) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [status, setStatus] = useState<"idle" | "connecting" | "ready">("idle");
   const [thinking, setThinking] = useState(false);
+  const [uploads, setUploads] = useState<UploadStatus[]>([]);
 
   const wsRef = useRef<WebSocket | null>(null);
   const queue = useRef<string[]>([]);
-  const initRef = useRef(false);
+  const initOk = useRef(false);
 
   useEffect(() => {
-    if (initRef.current) return;
-    initRef.current = true;
+    if (initOk.current) return;
+    initOk.current = true;
 
-    if (conversationId === undefined) {
-      api.newConversation().then((id) => setConversationId(id));
+    if (conversationId == null) {
+      api.newConversation().then(setConversationId);
     }
   }, [conversationId]);
 
@@ -41,7 +48,6 @@ export function useChat(initialId?: number) {
 
   const openWs = (id: number) => {
     setStatus("connecting");
-
     const ws = api.openWs(id);
     wsRef.current = ws;
 
@@ -55,9 +61,9 @@ export function useChat(initialId?: number) {
       const { type, content } = JSON.parse(e.data);
 
       switch (type) {
-        case "chunk":
+        case "chunk": {
           setMessages((m) => {
-            const last = m[m.length - 1];
+            const last = m.at(-1);
             if (last && last.role === "assistant") {
               last.content += content;
               return [...m];
@@ -65,16 +71,15 @@ export function useChat(initialId?: number) {
             return [...m, { role: "assistant", content }];
           });
           break;
-
-        case "answer":
+        }
+        case "answer": {
           setMessages((m) => [...m, { role: "assistant", content }]);
           setThinking(false);
           break;
-
+        }
         case "end":
           setThinking(false);
           break;
-
         default:
           console.warn("WS tipo desconocido:", type);
       }
@@ -88,39 +93,62 @@ export function useChat(initialId?: number) {
 
   const sendQuestion = (q: string) => {
     const ws = wsRef.current;
-    console.log("sendQuestion", q, "ws state", ws?.readyState); // 👀
-
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       queue.current.push(q);
       return;
     }
-    console.log("→ sending", q);
     ws.send(JSON.stringify({ question: q }));
     setMessages((m) => [...m, { role: "user", content: q }]);
     setThinking(true);
   };
 
-  const uploadFile = async (file: File) => {
-    if (!conversationId) {
-      const id = await api.newConversation();
-      setConversationId(id);
+  const uploadFiles = async (files: File[]) => {
+    if (!files.length) return;
+
+    setUploads((u) => {
+      const names = new Set(u.map((x) => x.name));
+      const add: UploadStatus[] = files
+        .filter((f) => !names.has(f.name))
+        .map((f) => ({ name: f.name, uploading: true, done: false }));
+      return [...u, ...add];
+    });
+
+    let cid = conversationId;
+    if (cid == null) {
+      cid = await api.newConversation();
+      setConversationId(cid);
     }
 
-    const res = await api.upload(file, conversationId);
+    for (const file of files) {
+      const { conversation_id } = await api.upload(file, cid);
+      cid = conversation_id;
 
-    if (conversationId !== res.conversation_id) {
-      setConversationId(res.conversation_id);
+      setUploads((u) =>
+        u.map((x) =>
+          x.name === file.name && x.uploading
+            ? { ...x, uploading: false, done: true }
+            : x
+        )
+      );
+    }
+
+    if (cid !== conversationId) {
+      setConversationId(cid);
       wsRef.current?.close();
-      openWs(res.conversation_id);
+      openWs(cid);
     }
   };
+
+  const uploadFile = (f: File) => uploadFiles([f]);
 
   return {
     messages,
     status,
     thinking,
+    uploads,
     sendQuestion,
     uploadFile,
+    uploadFiles,
     conversationId,
   };
 }
