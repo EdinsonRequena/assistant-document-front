@@ -1,0 +1,84 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ──────────────────────────────
+# Node / npm / pnpm / yarn
+# ──────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+# (guarda el lockfile si deseas builds reproducibles;
+#  bórralo de esta lista si prefieres versionarlo)
+
+# ──────────────────────────────
+# Vite / Build output
+# ──────────────────────────────
+dist/
+.vite/
+.vite-cache/
+
+# ──────────────────────────────
+# Test coverage / Cypress
+# ──────────────────────────────
+coverage/
+.cypress/
+*.spec.tsx
+*.spec.ts
+
+# ──────────────────────────────
+# Env files (⚠️ guarda un .env.example)
+# ──────────────────────────────
+.env
+.env.*          # .env.local, .env.production, etc.
+
+# ──────────────────────────────
+# Editor & OS artefacts
+# ──────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.swp
+*.bak
+
+# ──────────────────────────────
+# Linux / macOS dump files
+# ──────────────────────────────
+*.dmp
+*.stackdump
+*.orig
+
+# ──────────────────────────────
+# Log & cache
+# ──────────────────────────────
+*.log
+.cache/
+npm-cache/
+.parcel-cache/
