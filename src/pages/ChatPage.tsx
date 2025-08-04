@@ -10,7 +10,7 @@ import { useChat } from "../hooks/useChat";
 import DefaultLayout from "../layout/DefaultLayout";
 
 export default function ChatPage() {
-  const { messages, sendQuestion, uploadFile, status, thinking } = useChat(0);
+  const { messages, sendQuestion, uploadFile, status, thinking } = useChat();
 
   const [input, setInput] = useState("");
   const logRef = useRef<HTMLDivElement>(null);

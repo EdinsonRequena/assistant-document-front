@@ -66,4 +66,11 @@ export const api = {
     const wsURL = API_BASE_URL.replace(/^http/, "ws");
     return new WebSocket(`${wsURL}/ws/conversation/${conversationId}`);
   },
+
+  async newConversation(): Promise<number> {
+    const res = await request<{ conversation_id: number }>("ws/conversation", {
+      method: "POST",
+    });
+    return res.conversation_id;
+  },
 };
